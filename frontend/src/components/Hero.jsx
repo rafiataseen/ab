@@ -1,6 +1,7 @@
 import { useRef } from "react";
+import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { Zap, CalendarDays, ArrowRight } from "lucide-react";
+import { Zap, CalendarDays, ArrowRight, Trophy } from "lucide-react";
 import Countdown from "@/components/Countdown";
 import { WORKSHOP_DATE_LABEL } from "@/config";
 
@@ -36,9 +37,19 @@ export default function Hero({ onRegister, stats }) {
             Workshop Launchpad
           </span>
         </div>
-        <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-slate-300 sm:flex">
-          <CalendarDays size={13} className="text-emerald-400" />
-          {WORKSHOP_DATE_LABEL}
+        <div className="flex items-center gap-2.5">
+          <Link
+            data-testid="nav-leaderboard-link"
+            to="/leaderboard"
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-semibold text-slate-200 transition-colors hover:border-emerald-500/40 hover:text-emerald-400"
+          >
+            <Trophy size={13} className="text-emerald-400" />
+            Leaderboard
+          </Link>
+          <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-slate-300 sm:flex">
+            <CalendarDays size={13} className="text-emerald-400" />
+            {WORKSHOP_DATE_LABEL}
+          </div>
         </div>
       </header>
 

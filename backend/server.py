@@ -200,6 +200,43 @@ async def referrals(code: str):
     }
 
 
+@api_router.get("/leaderboard")
+async def leaderboard():
+    college_pipeline = [
+        {
+            "$group": {
+                "_id": {"$toLower": {"$trim": {"input": "$college"}}},
+                "registrations": {"$sum": 1},
+                "name": {"$first": {"$trim": {"input": "$college"}}},
+            }
+        },
+        {"$sort": {"registrations": -1, "_id": 1}},
+        {"$limit": 15},
+    ]
+    colleges = []
+    async for doc in db.registrations.aggregate(college_pipeline):
+        colleges.append({"college": doc["name"], "registrations": doc["registrations"]})
+
+    ref_pipeline = [
+        {"$match": {"referred_by": {"$ne": None}}},
+        {"$group": {"_id": "$referred_by", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1, "_id": 1}},
+        {"$limit": 15},
+    ]
+    referrers = []
+    async for doc in db.registrations.aggregate(ref_pipeline):
+        referrer = await db.registrations.find_one(
+            {"referral_code": doc["_id"]}, {"_id": 0, "full_name": 1}
+        )
+        if not referrer:
+            continue
+        parts = referrer["full_name"].strip().split()
+        display = parts[0] + (f" {parts[-1][0].upper()}." if len(parts) > 1 else "")
+        referrers.append({"name": display, "referrals": doc["count"]})
+
+    return {"colleges": colleges, "referrers": referrers}
+
+
 @api_router.get("/colleges")
 async def colleges(q: str = ""):
     q = q.strip()

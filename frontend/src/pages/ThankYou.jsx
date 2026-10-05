@@ -13,6 +13,7 @@ import {
   Gift,
   Lock,
   Users,
+  Trophy,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -244,6 +245,13 @@ export default function ThankYou() {
             >
               <CalendarPlus size={19} /> Add to Google Calendar
             </a>
+            <Link
+              data-testid="view-leaderboard-button"
+              to="/leaderboard"
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-6 py-4 text-base font-semibold text-emerald-300 transition-colors hover:bg-emerald-500/20"
+            >
+              <Trophy size={19} /> View the Leaderboard
+            </Link>
           </div>
 
           <div className="mt-8">
