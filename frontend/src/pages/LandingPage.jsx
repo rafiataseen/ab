@@ -28,6 +28,10 @@ export default function LandingPage() {
   }, [searchParams]);
 
   useEffect(() => {
+    if (searchParams.get("register") === "1") setModalOpen(true);
+  }, [searchParams]);
+
+  useEffect(() => {
     const lenis = new Lenis({ autoRaf: true });
     return () => lenis.destroy();
   }, []);

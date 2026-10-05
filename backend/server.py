@@ -7,6 +7,7 @@ import re
 import random
 import string
 import time
+import asyncio
 import logging
 from collections import defaultdict, deque
 from pathlib import Path
@@ -255,6 +256,168 @@ async def colleges(q: str = ""):
         if len(out) >= 8:
             break
     return {"colleges": out}
+
+
+class QuizAnswers(BaseModel):
+    branch: str = Field(min_length=1, max_length=40)
+    interest: str = Field(min_length=1, max_length=60)
+    comfort: str = Field(min_length=1, max_length=40)
+
+
+FALLBACK_IDEAS = [
+    {
+        "title": "Campus FAQ Chatbot",
+        "description": "A chatbot that answers freshers' questions about your college.",
+        "steps": [
+            "Collect 20 common questions and answers about your campus",
+            "Connect a free AI chat API to match questions to answers",
+            "Wrap it in a simple web page and share the link with juniors",
+        ],
+        "recruiter_line": "Shows you can turn a real campus problem into a working AI tool people actually use.",
+    },
+    {
+        "title": "Study-Buddy Quiz Bot",
+        "description": "A bot that quizzes you on your own notes before exams.",
+        "steps": [
+            "Convert one subject's notes into short Q&A pairs",
+            "Use an AI API to generate new practice questions from them",
+            "Hook it to a free messaging bot so friends can quiz themselves too",
+        ],
+        "recruiter_line": "Proves you can combine AI APIs with real messaging platforms — a skill product teams use daily.",
+    },
+    {
+        "title": "Lecture Photo Organizer",
+        "description": "An app that sorts your lecture photos by topic automatically.",
+        "steps": [
+            "Gather sample photos of whiteboards, notes and slides",
+            "Use a free image AI API to tag what each photo contains",
+            "Auto-file them into folders by subject and date",
+        ],
+        "recruiter_line": "Demonstrates practical computer-vision API usage on a problem every student has.",
+    },
+    {
+        "title": "Classroom Face Counter",
+        "description": "Counts how many students are in a class photo in seconds.",
+        "steps": [
+            "Take sample classroom photos with permission",
+            "Run them through a free face-detection model",
+            "Show the count on a tiny web dashboard for your class",
+        ],
+        "recruiter_line": "Real computer-vision deployment experience — a standout line in any interview.",
+    },
+    {
+        "title": "Placement Readiness Predictor",
+        "description": "Enter your CGPA and skills, get a realistic readiness score.",
+        "steps": [
+            "List the factors recruiters check (CGPA, skills, projects)",
+            "Score sample profiles with an AI API to find patterns",
+            "Build a small form that gives instant feedback",
+        ],
+        "recruiter_line": "Shows data-driven thinking about the very process you are interviewing for.",
+    },
+    {
+        "title": "Hostel Expense Forecaster",
+        "description": "Predicts next month's spending from your UPI history.",
+        "steps": [
+            "Export a month of transactions into a simple table",
+            "Let an AI API categorize each expense automatically",
+            "Chart the categories and predict next month's total",
+        ],
+        "recruiter_line": "End-to-end data pipeline work — collection, AI categorization and prediction in one project.",
+    },
+    {
+        "title": "Deadline Reminder Bot",
+        "description": "Never miss an assignment deadline again.",
+        "steps": [
+            "List your subjects and where deadlines get announced",
+            "Use an AI API to turn messy circular text into clean deadlines",
+            "Send yourself scheduled reminders from a simple script",
+        ],
+        "recruiter_line": "Automation that saves real time — recruiters love builders who remove busywork.",
+    },
+    {
+        "title": "Resume Tailor",
+        "description": "Rewrites your resume bullets for each job description.",
+        "steps": [
+            "Paste your resume and one job description",
+            "Ask an AI API to match your bullets to the job's keywords",
+            "Export the tailored version as a clean page",
+        ],
+        "recruiter_line": "Meta in the best way — you built the tool that improves the resume they are reading.",
+    },
+]
+
+INTEREST_INDEX = {
+    "chatting with apps": 0,
+    "images and cameras": 2,
+    "data and predictions": 4,
+    "automating boring tasks": 6,
+}
+
+
+def pick_fallback(interest: str, comfort: str) -> dict:
+    base = INTEREST_INDEX.get(interest.strip().lower(), 0)
+    offset = 0 if comfort.strip().lower() == "beginner" else 1
+    return FALLBACK_IDEAS[base + offset]
+
+
+async def generate_idea_with_llm(branch: str, interest: str, comfort: str) -> dict:
+    import json as _json
+    from emergentintegrations.llm.chat import LlmChat, UserMessage, TextDelta, StreamDone
+
+    chat = LlmChat(
+        api_key=os.environ["EMERGENT_LLM_KEY"],
+        session_id=f"project-matcher-{time.time_ns()}",
+        system_message=(
+            "You suggest beginner-friendly first AI projects for final-year "
+            "engineering students in India. You respond with valid JSON only — "
+            "no markdown, no code fences, no commentary."
+        ),
+    ).with_model("openai", "gpt-5.4")
+
+    prompt = (
+        f"Branch: {branch}. Enjoys: {interest}. Coding comfort: {comfort}.\n"
+        "Suggest ONE first AI project this student can build in a weekend with free tools. "
+        'Return ONLY a JSON object: {"title": "max 6 words", "description": "one sentence", '
+        '"steps": ["step 1", "step 2", "step 3"], "recruiter_line": "one sentence on why this '
+        'impresses recruiters"}. Keep steps simple and tool-agnostic.'
+    )
+
+    async def _collect() -> str:
+        parts = []
+        async for event in chat.stream_message(UserMessage(text=prompt)):
+            if isinstance(event, TextDelta):
+                parts.append(event.content)
+            elif isinstance(event, StreamDone):
+                break
+        return "".join(parts)
+
+    raw = (await asyncio.wait_for(_collect(), timeout=30)).strip()
+    if raw.startswith("```"):
+        raw = raw.strip("`").removeprefix("json").strip()
+    data = _json.loads(raw)
+    idea = {
+        "title": str(data["title"]).strip(),
+        "description": str(data["description"]).strip(),
+        "steps": [str(s).strip() for s in data["steps"]][:3],
+        "recruiter_line": str(data["recruiter_line"]).strip(),
+    }
+    if not idea["title"] or len(idea["steps"]) < 3 or not idea["recruiter_line"]:
+        raise ValueError("Incomplete idea from LLM")
+    return idea
+
+
+@api_router.post("/project-idea")
+async def project_idea(input: QuizAnswers):
+    await db.quiz_stats.update_one(
+        {"_id": "completions"}, {"$inc": {"count": 1}}, upsert=True
+    )
+    try:
+        idea = await generate_idea_with_llm(input.branch, input.interest, input.comfort)
+        return {"idea": idea, "source": "ai"}
+    except Exception as e:
+        logger.warning(f"LLM project idea failed, using fallback: {e}")
+        return {"idea": pick_fallback(input.interest, input.comfort), "source": "fallback"}
 
 
 app.include_router(api_router)

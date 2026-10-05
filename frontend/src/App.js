@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import LandingPage from "@/pages/LandingPage";
 import ThankYou from "@/pages/ThankYou";
 import Leaderboard from "@/pages/Leaderboard";
+import ProjectMatcher from "@/pages/ProjectMatcher";
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/thank-you" element={<ThankYou />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
+        <Route path="/project-matcher" element={<ProjectMatcher />} />
       </Routes>
       <Toaster position="top-center" richColors />
     </BrowserRouter>
