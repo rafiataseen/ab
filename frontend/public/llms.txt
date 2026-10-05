@@ -1,0 +1,8 @@
+# Workshop Launchpad
+
+> Free live online workshop "Build Your First AI Project in 60 Minutes" for final-year engineering students in India. Held online on Saturday, October 10, 2026, 2:00–3:00 PM IST. No prior AI experience needed. Registration is free and limited to 500 seats.
+
+## Pages
+
+- / — Landing page with workshop details, the 60-minute blueprint, audience info, FAQ, and free seat registration
+- /thank-you — Registration confirmation with the WhatsApp community link and an add-to-calendar option

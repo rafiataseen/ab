@@ -1,0 +1,312 @@
+{
+  "project_name": "Workshop Launchpad",
+  "archetype": "The Performance Pro meets Modern Editorial Tech",
+  "app_type": "landing_page",
+  "context": "Marketing / High-Conversion Workshop Registration Page",
+  "target_audience": "Final-year engineering students across India (CSE, IT, ECE, EEE, Mech, Civil, others) arriving primarily via WhatsApp share links on mobile devices.",
+  "workshop_details": {
+    "title": "Build Your First AI Project in 60 Minutes",
+    "subtitle": "Free live workshop for final-year engineering students. No prior AI experience needed.",
+    "date_time_ist": "October 10, 2026, 2:00 PM – 3:00 PM IST",
+    "iso_start": "2026-10-10T14:00:00+05:30",
+    "iso_end": "2026-10-10T15:00:00+05:30",
+    "format": "Free 100% Live Interactive Hands-on Session with Certificate & GitHub Repo",
+    "total_seats": 500,
+    "initial_claimed_seats": 384
+  },
+  "typography": {
+    "font_families": {
+      "heading": "Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, sans-serif",
+      "body": "Plus Jakarta Sans, -apple-system, BlinkMacSystemFont, sans-serif",
+      "mono": "JetBrains Mono, Menlo, monospace"
+    },
+    "scale_hierarchy": {
+      "hero_h1": "text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.08]",
+      "section_h2": "text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight",
+      "subsection_h3": "text-xl sm:text-2xl font-semibold tracking-tight",
+      "card_title_h4": "text-lg sm:text-xl font-semibold",
+      "body_lg": "text-base sm:text-lg text-slate-300 leading-relaxed",
+      "body_base": "text-sm sm:text-base text-slate-300 leading-relaxed",
+      "label_eyebrow": "text-xs uppercase tracking-[0.2em] font-semibold text-emerald-400"
+    },
+    "rules": [
+      "NO generic Inter for main headlines; use Plus Jakarta Sans with heavy tracking-tight.",
+      "Never exceed text-6xl for H1 to protect mobile readability and avoid ridiculous poster-like cutoffs.",
+      "Overlines/Eyebrows must be uppercase with tracking-[0.2em] and high-contrast electric accent."
+    ]
+  },
+  "colors": {
+    "theme_mode": "dark",
+    "palette": {
+      "background_dark_navy": "#070C18",
+      "background_card_surface": "#0C1427",
+      "background_card_hover": "#111C38",
+      "border_subtle": "rgba(255, 255, 255, 0.08)",
+      "border_accent_glow": "rgba(34, 197, 94, 0.35)",
+      "text_primary": "#F8FAFC",
+      "text_secondary": "#94A3B8",
+      "text_muted": "#64748B",
+      "accent_electric_lime": "#10B981",
+      "accent_electric_lime_light": "#34D399",
+      "accent_electric_blue": "#0284C7",
+      "accent_electric_cyan": "#06B6D4",
+      "accent_alert_amber": "#F59E0B"
+    },
+    "contrast_rules": [
+      "Background must remain deep dark navy (#070C18) - never washed-out grey.",
+      "Buttons with electric lime (#10B981) MUST have dark navy text (#04101A) with font-bold for 7:1+ APCA contrast.",
+      "Sticky mobile bottom bar must have solid/crystal backdrop blur bg-slate-950/90 border-t border-white/10 to avoid text bleed over page content."
+    ]
+  },
+  "visual_enhancers": {
+    "grid_background": "radial-gradient(ellipse at 50% 0%, rgba(16, 185, 129, 0.15) 0%, rgba(7, 12, 24, 0) 70%), linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)",
+    "glassmorphism": "backdrop-blur-xl bg-slate-900/70 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.37)]",
+    "card_tactile": "bg-[#0C1427] border border-white/10 rounded-2xl p-6 sm:p-8 hover:border-emerald-500/40 hover:-translate-y-1 transition-transform duration-300",
+    "pulse_glow": "shadow-[0_0_24px_rgba(16,185,129,0.35)]"
+  },
+  "layout_sections": [
+    {
+      "order": 1,
+      "id": "hero",
+      "name": "Hero Section",
+      "description": "High-impact kinetic hero with live countdown timer, seats-claimed progress bar, fast-action CTA, and social-proof tags.",
+      "components": [
+        "Live Countdown Timer to Oct 10, 2026, 2:00 PM IST (Days, Hours, Minutes, Seconds)",
+        "Live Counter & Progress Bar: e.g. 427 of 500 seats claimed (85% filled) with pulsing 'Almost Full' badge",
+        "Primary CTA button: 'Reserve My Free Seat' triggering registration modal",
+        "Key tags: 100% Free, Beginner Friendly, Verified Certificate, GitHub Code Access",
+        "Kinetic Marquee showing participating student colleges and tech stack keywords"
+      ]
+    },
+    {
+      "order": 2,
+      "id": "why-care",
+      "name": "Why You Should Care",
+      "description": "Three rounded cards with high-contrast icons addressing final year placement anxieties and aspirations.",
+      "cards": [
+        {
+          "title": "A Star Project for Your Resume & Interviews",
+          "tag": "PLACEMENT READY",
+          "body": "Stop putting generic calculator apps or clone projects. Walk into your campus interviews with a deployed, live full-stack AI application recruiters can test on their phones."
+        },
+        {
+          "title": "AI Skills Employers Are Demanding in 2026",
+          "tag": "INDUSTRY REALITY",
+          "body": "92% of tech campus drives now test for hands-on LLM prompt orchestration, vector retrieval, and agentic workflows. Gain real architectural literacy in 60 minutes."
+        },
+        {
+          "title": "Learn by Building, Zero Boring Slide Theory",
+          "tag": "100% HANDS-ON",
+          "body": "No 2-hour monologues on math derivations. We open the code editor at minute 05 and have a working AI micro-service deployed live before minute 60."
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "id": "what-you-build",
+      "name": "What You'll Build (The 60-Minute Blueprint)",
+      "description": "Clean 4-step progressive timeline detailing the exact 60-minute journey with time stamps and visual tech badges.",
+      "steps": [
+        {
+          "step": "01",
+          "time": "00 - 12 Min",
+          "phase": "Setup & API Wiring",
+          "detail": "Initialize environment, connect lightweight inference keys, and verify cloud endpoints without complex local installs."
+        },
+        {
+          "step": "02",
+          "time": "12 - 35 Min",
+          "phase": "Build the AI Core",
+          "detail": "Write real-time context streaming, construct prompt engineering pipelines, and bind smart response logic."
+        },
+        {
+          "step": "03",
+          "time": "35 - 50 Min",
+          "phase": "Test & Edge Cases",
+          "detail": "Handle hallucinations, latency fallbacks, and token budgeting so your app handles unpredictable user prompts."
+        },
+        {
+          "step": "04",
+          "time": "50 - 60 Min",
+          "phase": "Deploy & Show It Off",
+          "detail": "Ship to a live publicly accessible URL, generate your verified workshop credential, and link to your LinkedIn and resume."
+        }
+      ]
+    },
+    {
+      "order": 4,
+      "id": "who-is-this-for",
+      "name": "Who Is This For",
+      "description": "Branch-inclusive breakdown showing final-year students from all streams that they belong and will succeed.",
+      "branches": [
+        {
+          "branch": "CSE / IT",
+          "highlight": "Level up your web/app stack with production AI microservices"
+        },
+        {
+          "branch": "ECE / EEE",
+          "highlight": "Bridge signal/embedded intuition with modern software AI APIs"
+        },
+        {
+          "branch": "Mech / Civil / Chemical",
+          "highlight": "Add an unbeatable dual-advantage edge for IT placements and tech analyst roles"
+        },
+        {
+          "branch": "All Other Branches",
+          "highlight": "Zero prior AI or deep math prerequisites needed — built for beginners"
+        }
+      ]
+    },
+    {
+      "order": 5,
+      "id": "faq",
+      "name": "Frequently Asked Questions",
+      "description": "5 interactive accordion items clearing every student doubt.",
+      "items": [
+        {
+          "q": "Is this workshop really 100% free?",
+          "a": "Yes, absolutely zero charges. No credit card required. Free live access, code repository, and certificate of completion."
+        },
+        {
+          "q": "Do I need prior Python or Machine Learning knowledge?",
+          "a": "None! If you understand basic programming fundamentals (loops, functions in any language), you will comfortably follow every step."
+        },
+        {
+          "q": "Will a recording be provided if I miss the live session?",
+          "a": "Only registered participants who attend live receive the verified certificate and Q&A access. Limited replay will be shared in the WhatsApp community."
+        },
+        {
+          "q": "What software do I need to install beforehand?",
+          "a": "Just a modern browser (Chrome/Edge/Brave) and a free GitHub account. We provide interactive cloud environments so you do not struggle with heavy software setups."
+        },
+        {
+          "q": "Can I put this project directly on my resume for campus placements?",
+          "a": "Yes! You will have a live deployed link, complete source code, and explanation talking points tailored specifically for placement technical interviews."
+        }
+      ]
+    },
+    {
+      "order": 6,
+      "id": "sticky-mobile-cta",
+      "name": "Sticky Mobile Register Bar",
+      "description": "Fixed bottom bar on mobile (<768px) with quick seats-left urgency note and one-tap 'Claim Free Seat' CTA."
+    }
+  ],
+  "registration_modal": {
+    "fields": [
+      {
+        "name": "full_name",
+        "label": "Full Name",
+        "placeholder": "e.g. Rahul Sharma",
+        "type": "text",
+        "validation": "Required, min 2 characters"
+      },
+      {
+        "name": "college",
+        "label": "College / University Name",
+        "placeholder": "Type your college (e.g. IIT Bombay, Anna University, RVCE, SRM...)",
+        "type": "autocomplete_text",
+        "validation": "Required"
+      },
+      {
+        "name": "branch",
+        "label": "Engineering Branch",
+        "type": "dropdown",
+        "options": [
+          "Computer Science & Engineering (CSE)",
+          "Information Technology (IT)",
+          "Electronics & Communication (ECE)",
+          "Electrical & Electronics (EEE)",
+          "Mechanical Engineering (ME)",
+          "Civil Engineering (CE)",
+          "Data Science / AI & ML",
+          "Chemical / Biotech / Other"
+        ],
+        "validation": "Required"
+      },
+      {
+        "name": "grad_year",
+        "label": "Graduation Year",
+        "type": "dropdown",
+        "options": ["2026 (Final Year)", "2027", "2025 (Recent Grad)", "Other"],
+        "validation": "Required"
+      },
+      {
+        "name": "whatsapp_number",
+        "label": "WhatsApp Number (For joining link & updates)",
+        "placeholder": "10-digit mobile number (e.g. 9876543210)",
+        "type": "tel",
+        "validation": "Required, valid 10-digit Indian phone number"
+      },
+      {
+        "name": "email",
+        "label": "College or Personal Email",
+        "placeholder": "rahul@gmail.com",
+        "type": "email",
+        "validation": "Required, valid email format"
+      }
+    ],
+    "storage": "Saves to MongoDB via FastAPI POST /api/register endpoint, returns registration id and confirmation"
+  },
+  "thank_you_page": {
+    "route": "/thank-you",
+    "headline": "You're In! Your Free Seat is Reserved 🎉",
+    "subheadline": "Check your WhatsApp & Email for immediate confirmation details.",
+    "cta_buttons": [
+      {
+        "label": "Join Official WhatsApp Workshop Group",
+        "style": "bg-[#25D366] hover:bg-[#20bd5a] text-slate-950 font-bold text-lg shadow-lg flex items-center justify-center gap-2",
+        "action": "Opens WhatsApp Community link with group instructions"
+      },
+      {
+        "label": "Add to Google Calendar",
+        "style": "bg-slate-800 hover:bg-slate-700 text-white font-medium border border-white/20 flex items-center justify-center gap-2",
+        "action": "Pre-filled Google Calendar event (Oct 10, 2026, 2:00 PM - 3:00 PM IST) with workshop link"
+      }
+    ],
+    "prep_checklist": [
+      "Keep your laptop charged & ready with Chrome or Edge",
+      "Have your free GitHub account login handy",
+      "Invite your batchmates before seats reach full capacity"
+    ]
+  },
+  "image_urls": {
+    "students_coding": {
+      "url": "https://images.unsplash.com/photo-1565598611425-45b0878bdd0b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzN8MHwxfHNlYXJjaHwzfHxzdHVkZW50cyUyMGNvZGluZyUyMGxhcHRvcCUyMGhhY2thdGhvbnxlbnwwfHx8fDE3OTExODkzNjB8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Engineering students actively collaborating on laptops during hands-on coding build",
+      "placement": "Why You Should Care section hero side graphic or trust badge"
+    },
+    "indian_students_discussion": {
+      "url": "https://images.unsplash.com/photo-1686624386665-4cd01b96d0f6?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2OTF8MHwxfHNlYXJjaHwyfHxpbmRpYW4lMjBzdHVkZW50JTIwZW5naW5lZXJpbmclMjBjb2xsZWdlfGVufDB8fHx8MTc5MTE4OTM2MHww&ixlib=rb-4.1.0&q=85",
+      "description": "Indian college engineering students reviewing technical coursework together",
+      "placement": "Who is this for / Testimonial & Placement readiness section"
+    },
+    "ai_neural_graphic": {
+      "url": "https://images.unsplash.com/photo-1677442136019-21780ecad995?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDR8MHwxfHNlYXJjaHwxfHxhaSUyMHJvYm90aWMlMjBmdXR1cmlzdGljJTIwYWJzdHJhY3QlMjBncmFwaGljfGVufDB8fHx8MTc5MTE4OTM3MXww&ixlib=rb-4.1.0&q=85",
+      "description": "Modern 3D AI glowing typography and dark digital grid",
+      "placement": "Hero background ambient element or What You'll Build preview banner"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Use JavaScript (.js and .jsx files), NOT TypeScript (.tsx).",
+    "Keep mobile speed paramount: load fonts efficiently, keep DOM lightweight, and ensure smooth touch targets.",
+    "Live seats counter must start around 384/500 and dynamically update/reflect recent registrations from the backend API.",
+    "College field in registration modal should provide responsive autocomplete with popular Indian engineering colleges (IITs, NITs, BITS, VIT, SRM, Anna Univ, VTU, Manipal, Delhi Tech Univ, JNTU, Mumbai Univ, Pune Univ, etc.) plus allow custom typing.",
+    "Form must send POST /api/register to FastAPI backend, store registration in MongoDB, and route cleanly to /thank-you with prefilled student details.",
+    "Include simulated live registration ticker (e.g. 'Priya K. from RVCE just registered 2m ago') for social proof.",
+    "Add 'data-testid' on every interactive element: register-button, sticky-register-button, registration-modal, input-full-name, input-college, select-branch, select-grad-year, input-whatsapp, input-email, submit-registration, join-whatsapp-button, add-to-calendar-button, faq-accordion, countdown-timer, seats-progress-bar."
+  ],
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "You tend to converge toward generic, 'on distribution' outputs. Avoid this: make creative, distinctive frontends that surprise and delight.",
+    "Dark colors look good when used independently without muddy gradients. Stick to deep navy #070C18 with electric lime accents #10B981.",
+    "Don't make generic centered layouts. Use crisp asymmetric bento containers and distinct micro-typography.",
+    "Create depth through layered design elements with z-index hierarchy and delicate 1px border strokes (border-white/10).",
+    "Use glass-morphism effects with backdrop filters (12-24px blur) for sticky navs and floating CTAs.",
+    "You MUST NOT apply universal transition like 'transition: all'. Explicitly add transitions for transform, opacity, background-color.",
+    "You MUST NOT center align the app container (.App { text-align: center; }).",
+    "NEVER use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯 for icons; use clean Lucide SVG icons instead.",
+    "Every interaction needs micro-animations: hover states, smooth accordion spring, modal overlay enter/exit.",
+    "Use 2-3x more spacing (p-6, p-8, p-12) to give sections breathing room.",
+    "All interactive and key informational elements MUST include a data-testid attribute."
+  ]
+}
