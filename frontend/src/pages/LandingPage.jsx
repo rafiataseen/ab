@@ -28,6 +28,12 @@ export default function LandingPage() {
   }, [searchParams]);
 
   useEffect(() => {
+    if (sessionStorage.getItem("wl_tracked_visit")) return;
+    sessionStorage.setItem("wl_tracked_visit", "1");
+    axios.post(`${API_URL}/track`, { event: "page_visit", page: "/" }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     if (searchParams.get("register") === "1") setModalOpen(true);
   }, [searchParams]);
 

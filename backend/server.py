@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Request
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Depends, Response
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -8,13 +8,14 @@ import random
 import string
 import time
 import asyncio
+import jwt
 import logging
 from collections import defaultdict, deque
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator, BeforeValidator
 from typing import Optional, Annotated
 from bson import ObjectId
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -418,6 +419,203 @@ async def project_idea(input: QuizAnswers):
     except Exception as e:
         logger.warning(f"LLM project idea failed, using fallback: {e}")
         return {"idea": pick_fallback(input.interest, input.comfort), "source": "fallback"}
+
+
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
+JWT_SECRET = os.environ.get("JWT_SECRET", "")
+JWT_ALGORITHM = "HS256"
+ADMIN_TOKEN_HOURS = 12
+
+_admin_rate: dict = defaultdict(deque)
+
+
+class AdminLogin(BaseModel):
+    password: str = Field(min_length=1, max_length=200)
+
+
+class TrackEvent(BaseModel):
+    event: str = Field(max_length=30)
+    page: str = Field(default="/", max_length=60)
+
+
+def create_admin_token() -> str:
+    payload = {
+        "sub": "admin",
+        "type": "admin",
+        "exp": datetime.now(timezone.utc) + timedelta(hours=ADMIN_TOKEN_HOURS),
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+
+async def require_admin(request: Request):
+    auth = request.headers.get("Authorization", "")
+    token = auth[7:] if auth.startswith("Bearer ") else ""
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        if payload.get("type") != "admin":
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid or expired session — log in again")
+
+
+@api_router.post("/admin/login")
+async def admin_login(input: AdminLogin, request: Request):
+    ip = client_ip(request)
+    now = time.time()
+    bucket = _admin_rate[ip]
+    while bucket and now - bucket[0] > 60:
+        bucket.popleft()
+    if len(bucket) >= 5:
+        raise HTTPException(
+            status_code=429, detail="Too many login attempts — wait a minute and try again."
+        )
+    bucket.append(now)
+    if not ADMIN_PASSWORD or input.password != ADMIN_PASSWORD:
+        raise HTTPException(status_code=401, detail="Incorrect password")
+    return {"token": create_admin_token()}
+
+
+@api_router.post("/track", status_code=204)
+async def track(input: TrackEvent):
+    if input.event not in ("page_visit", "form_start"):
+        return
+    await db.funnel_events.insert_one(
+        {
+            "event": input.event,
+            "page": input.page,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        }
+    )
+
+
+def _ist_date(iso: str) -> str:
+    return (datetime.fromisoformat(iso) + timedelta(hours=5, minutes=30)).date().isoformat()
+
+
+@api_router.get("/admin/dashboard")
+async def admin_dashboard(_: None = Depends(require_admin)):
+    docs = await db.registrations.find(
+        {},
+        {"_id": 0, "full_name": 1, "college": 1, "source": 1, "referred_by": 1, "created_at": 1, "referral_code": 1},
+    ).to_list(100000)
+
+    total = len(docs)
+    now_ist = datetime.now(timezone.utc) + timedelta(hours=5, minutes=30)
+    today_ist = now_ist.date().isoformat()
+
+    by_source = {}
+    college_counts = {}
+    day_map = {}
+    ref_counts = {}
+    name_by_code = {}
+    referral_driven = 0
+    for d in docs:
+        src = d.get("source") or "direct"
+        by_source[src] = by_source.get(src, 0) + 1
+        norm = d["college"].strip().lower()
+        if norm not in college_counts:
+            college_counts[norm] = {"college": d["college"].strip(), "registrations": 0}
+        college_counts[norm]["registrations"] += 1
+        day = _ist_date(d["created_at"])
+        day_map[day] = day_map.get(day, 0) + 1
+        name_by_code[d["referral_code"]] = d["full_name"]
+        if d.get("referred_by"):
+            referral_driven += 1
+            ref_counts[d["referred_by"]] = ref_counts.get(d["referred_by"], 0) + 1
+
+    daily = []
+    for i in range(6, -1, -1):
+        day = (now_ist - timedelta(days=i)).date().isoformat()
+        daily.append({"date": day, "count": day_map.get(day, 0)})
+
+    top_colleges = sorted(
+        college_counts.values(), key=lambda x: (-x["registrations"], x["college"].lower())
+    )[:10]
+    top_codes = sorted(ref_counts.items(), key=lambda x: -x[1])[:10]
+    top_referrers = [
+        {"name": name_by_code.get(code, "Unknown"), "code": code, "referrals": n}
+        for code, n in top_codes
+    ]
+
+    visits = await db.funnel_events.count_documents({"event": "page_visit"})
+    starts = await db.funnel_events.count_documents({"event": "form_start"})
+
+    return {
+        "kpis": {
+            "total": total,
+            "target": REGISTRATION_TARGET,
+            "pct_of_target": round(total / REGISTRATION_TARGET * 100, 1),
+            "today": sum(1 for d in docs if _ist_date(d["created_at"]) == today_ist),
+            "referral_share": round(referral_driven / total * 100, 1) if total else 0,
+            "unique_colleges": len(college_counts),
+        },
+        "daily": daily,
+        "by_source": [
+            {"source": k, "count": v}
+            for k, v in sorted(by_source.items(), key=lambda x: -x[1])
+        ],
+        "top_colleges": top_colleges,
+        "top_referrers": top_referrers,
+        "funnel": {"page_visits": visits, "form_starts": starts, "registered": total},
+    }
+
+
+@api_router.get("/admin/registrations")
+async def admin_registrations(
+    page: int = 1, q: str = "", _: None = Depends(require_admin)
+):
+    per_page = 10
+    filt = {}
+    if q.strip():
+        rx = {"$regex": re.escape(q.strip()), "$options": "i"}
+        filt = {
+            "$or": [
+                {"full_name": rx},
+                {"college": rx},
+                {"email": rx},
+                {"whatsapp_number": rx},
+                {"referral_code": rx},
+            ]
+        }
+    total = await db.registrations.count_documents(filt)
+    pages = max(1, (total + per_page - 1) // per_page)
+    page = max(1, min(page, pages))
+    items = await db.registrations.find(filt, {"_id": 0}).sort("created_at", -1).skip(
+        (page - 1) * per_page
+    ).limit(per_page).to_list(per_page)
+    return {"items": items, "total": total, "page": page, "pages": pages}
+
+
+@api_router.get("/admin/export.csv")
+async def admin_export(_: None = Depends(require_admin)):
+    import csv
+    import io
+
+    docs = await db.registrations.find({}, {"_id": 0}).sort("created_at", -1).to_list(100000)
+    headers = [
+        "full_name",
+        "college",
+        "branch",
+        "grad_year",
+        "whatsapp_number",
+        "email",
+        "source",
+        "referred_by",
+        "referral_code",
+        "created_at",
+    ]
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(headers)
+    for d in docs:
+        writer.writerow([d.get(h) or "" for h in headers])
+    return Response(
+        content=buf.getvalue(),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=registrations.csv"},
+    )
 
 
 app.include_router(api_router)

@@ -102,6 +102,12 @@ export default function RegisterModal({ open, onOpenChange, tracking }) {
   };
 
   useEffect(() => {
+    if (!open || sessionStorage.getItem("wl_tracked_form")) return;
+    sessionStorage.setItem("wl_tracked_form", "1");
+    axios.post(`${API_URL}/track`, { event: "form_start", page: "/" }).catch(() => {});
+  }, [open]);
+
+  useEffect(() => {
     const q = form.college.trim();
     if (q.length < 2) {
       setServerColleges([]);
