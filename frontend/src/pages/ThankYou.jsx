@@ -1,4 +1,6 @@
-import { useLocation, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useSearchParams, Link } from "react-router-dom";
+import axios from "axios";
 import { motion } from "framer-motion";
 import {
   CheckCircle2,
@@ -7,13 +9,19 @@ import {
   Copy,
   ArrowLeft,
   Zap,
-  Ticket,
+  Share2,
+  Gift,
+  Lock,
+  Users,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
+  API_URL,
   WHATSAPP_COMMUNITY_LINK,
   GOOGLE_CALENDAR_URL,
   WORKSHOP_DATE_LABEL,
+  REWARD_TIERS,
+  whatsappShareUrl,
 } from "@/config";
 
 const CHECKLIST = [
@@ -24,20 +32,51 @@ const CHECKLIST = [
 
 export default function ThankYou() {
   const { state } = useLocation();
-  const name = state?.name || "";
-  const referralCode = state?.referralCode || "";
-  const shareLink = referralCode
-    ? `${window.location.origin}/?ref=${referralCode}&src=referral`
+  const [searchParams] = useSearchParams();
+  const referralCode = (searchParams.get("code") || state?.referralCode || "")
+    .trim()
+    .toUpperCase();
+  const [refStats, setRefStats] = useState(null);
+  const [codeInvalid, setCodeInvalid] = useState(false);
+
+  const name = state?.name || refStats?.first_name || "";
+  const referralLink = referralCode
+    ? `${window.location.origin}/?ref=${referralCode}`
     : "";
+
+  useEffect(() => {
+    if (!referralCode) return;
+    let mounted = true;
+    const fetchStats = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/referrals/${referralCode}`);
+        if (mounted) setRefStats(res.data);
+      } catch (err) {
+        if (mounted && err.response?.status === 404) setCodeInvalid(true);
+      }
+    };
+    fetchStats();
+    const id = setInterval(fetchStats, 15000);
+    return () => {
+      mounted = false;
+      clearInterval(id);
+    };
+  }, [referralCode]);
 
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(shareLink);
-      toast.success("Invite link copied — share it with your batchmates!");
+      await navigator.clipboard.writeText(referralLink);
+      toast.success("Referral link copied — share it with your batchmates!");
     } catch {
       toast.error("Could not copy. Long-press the link to copy it.");
     }
   };
+
+  const count = refStats?.referral_count ?? 0;
+  const maxTier = REWARD_TIERS[REWARD_TIERS.length - 1]?.count || 10;
+  const progressPct = Math.min(100, Math.round((count / maxTier) * 100));
+  const nextTier = REWARD_TIERS.find((t) => count < t.count);
+  const showReferral = referralCode && !codeInvalid;
 
   return (
     <div className="hero-grid-bg min-h-screen bg-[#070C18] px-5 py-10 text-slate-50 sm:px-8">
@@ -69,6 +108,123 @@ export default function ThankYou() {
             email before the session — {WORKSHOP_DATE_LABEL}.
           </p>
 
+          {showReferral && (
+            <div className="mt-8 rounded-2xl border border-emerald-500/25 bg-emerald-500/5 p-5">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
+                <Share2 size={14} /> Your referral link
+              </div>
+              <div className="mt-3 flex items-center gap-2">
+                <code
+                  data-testid="referral-link"
+                  className="font-mono-num min-w-0 flex-1 truncate rounded-xl border border-white/10 bg-slate-950/60 px-4 py-3 text-xs text-slate-200 sm:text-sm"
+                >
+                  {referralLink}
+                </code>
+                <button
+                  data-testid="copy-invite-link-button"
+                  onClick={copyLink}
+                  aria-label="Copy referral link"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-slate-200 transition-colors hover:bg-white/10"
+                >
+                  <Copy size={17} />
+                </button>
+              </div>
+              <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500">
+                <span>
+                  Code:{" "}
+                  <span data-testid="referral-code" className="font-mono-num text-emerald-400">
+                    {referralCode}
+                  </span>
+                </span>
+                <span>Share it, climb the rewards</span>
+              </div>
+
+              <a
+                data-testid="share-whatsapp-button"
+                href={whatsappShareUrl(referralLink)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-4 text-base font-bold text-slate-950 shadow-[0_0_28px_rgba(37,211,102,0.3)] transition-colors hover:bg-[#20bd5a]"
+              >
+                <Share2 size={19} /> Share on WhatsApp
+              </a>
+
+              <div className="mt-6 flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3.5">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400">
+                  <Users size={19} />
+                </span>
+                <p data-testid="referral-count" className="text-sm text-slate-200">
+                  You've brought in{" "}
+                  <span className="font-mono-num text-lg font-bold text-emerald-400">
+                    {count}
+                  </span>{" "}
+                  friend{count === 1 ? "" : "s"}
+                </p>
+              </div>
+
+              <div data-testid="reward-tiers" className="mt-6">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                  <Gift size={14} className="text-emerald-400" /> Referral rewards
+                </div>
+                <div
+                  data-testid="tier-progress-bar"
+                  className="relative mt-4 h-2.5 overflow-visible rounded-full bg-white/10"
+                >
+                  <motion.div
+                    className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-lime-400"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progressPct}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                  />
+                  {REWARD_TIERS.map((t) => (
+                    <span
+                      key={t.count}
+                      className={`absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 ${
+                        count >= t.count
+                          ? "border-lime-300 bg-emerald-400"
+                          : "border-slate-600 bg-[#0C1427]"
+                      }`}
+                      style={{ left: `${(t.count / maxTier) * 100}%` }}
+                    />
+                  ))}
+                </div>
+                <p className="mt-3 text-xs text-slate-400">
+                  {nextTier
+                    ? `${nextTier.count - count} more friend${
+                        nextTier.count - count === 1 ? "" : "s"
+                      } to unlock “${nextTier.name}”`
+                    : "All reward tiers unlocked — see you at the top!"}
+                </p>
+                <ul className="mt-4 space-y-2.5">
+                  {REWARD_TIERS.map((t) => {
+                    const reached = count >= t.count;
+                    return (
+                      <li
+                        key={t.count}
+                        data-testid={`tier-${t.count}`}
+                        className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-colors ${
+                          reached
+                            ? "border-emerald-500/40 bg-emerald-500/10 text-slate-100"
+                            : "border-white/10 bg-white/[0.03] text-slate-400"
+                        }`}
+                      >
+                        {reached ? (
+                          <CheckCircle2 size={17} className="shrink-0 text-emerald-400" />
+                        ) : (
+                          <Lock size={15} className="shrink-0 text-slate-600" />
+                        )}
+                        <span className="font-mono-num shrink-0 font-bold text-emerald-400">
+                          {t.count}
+                        </span>
+                        <span>{t.name}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
+          )}
+
           <div className="mt-8 space-y-3">
             <a
               data-testid="join-whatsapp-button"
@@ -89,27 +245,6 @@ export default function ThankYou() {
               <CalendarPlus size={19} /> Add to Google Calendar
             </a>
           </div>
-
-          {referralCode && (
-            <div className="mt-8 rounded-2xl border border-emerald-500/25 bg-emerald-500/5 p-5">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-400">
-                <Ticket size={14} /> Your referral code
-              </div>
-              <div
-                data-testid="referral-code"
-                className="font-mono-num mt-2 text-3xl font-bold tracking-[0.3em] text-slate-50"
-              >
-                {referralCode}
-              </div>
-              <button
-                data-testid="copy-invite-link-button"
-                onClick={copyLink}
-                className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors hover:bg-white/10"
-              >
-                <Copy size={15} /> Copy invite link
-              </button>
-            </div>
-          )}
 
           <div className="mt-8">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">

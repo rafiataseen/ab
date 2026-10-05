@@ -37,3 +37,16 @@ export const GOOGLE_CALENDAR_URL = `https://calendar.google.com/calendar/render?
 )}/${toCal(WORKSHOP_END_TIME)}&details=${calDetails}&location=${encodeURIComponent(
   "Online (Live)"
 )}`;
+
+// Referral reward tiers — "count" friends must register with your link to unlock "name"
+export const REWARD_TIERS = [
+  { count: 3, name: "Early Access Badge" },
+  { count: 5, name: "Priority Q&A slot" },
+  { count: 10, name: "Entry into the top-referrer reward draw" },
+];
+
+// Pre-filled WhatsApp share message for the referral link
+export const whatsappShareUrl = (referralLink) =>
+  `https://wa.me/?text=${encodeURIComponent(
+    `I just reserved my free seat for 'Build Your First AI Project in 60 Minutes'. Join me, it's free for final-year students: ${referralLink}`
+  )}`;

@@ -154,7 +154,7 @@ export default function RegisterModal({ open, onOpenChange, tracking }) {
         referred_by: tracking.referred_by || null,
       });
       onOpenChange(false);
-      navigate("/thank-you", {
+      navigate(`/thank-you?code=${res.data.referral_code}`, {
         state: { name: res.data.full_name, referralCode: res.data.referral_code },
       });
     } catch (err) {
