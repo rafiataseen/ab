@@ -40,6 +40,10 @@ export default function ThankYou() {
   const [refStats, setRefStats] = useState(null);
   const [codeInvalid, setCodeInvalid] = useState(false);
 
+  useEffect(() => {
+    document.title = "You're In! — Workshop Launchpad";
+  }, []);
+
   const name = state?.name || refStats?.first_name || "";
   const referralLink = referralCode
     ? `${window.location.origin}/?ref=${referralCode}`

@@ -35,7 +35,7 @@ export default function Funnel({ funnel }) {
               <div className="mt-1.5 h-3 overflow-hidden rounded-full bg-white/10">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-lime-400 transition-[width] duration-700"
-                  style={{ width: `${Math.max(2, Math.round((s.value / max) * 100))}%` }}
+                  style={{ width: `${Math.min(100, Math.max(2, Math.round((s.value / max) * 100)))}%` }}
                 />
               </div>
             </div>

@@ -6,6 +6,7 @@ import ThankYou from "@/pages/ThankYou";
 import Leaderboard from "@/pages/Leaderboard";
 import ProjectMatcher from "@/pages/ProjectMatcher";
 import Admin from "@/pages/Admin";
+import NotFound from "@/pages/NotFound";
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/project-matcher" element={<ProjectMatcher />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster position="top-center" richColors />
     </BrowserRouter>

@@ -19,6 +19,25 @@ export default function Countdown() {
     return () => clearInterval(id);
   }, []);
 
+  const isLive = parts.every((p) => p.value === 0);
+
+  if (isLive) {
+    return (
+      <div
+        data-testid="countdown-timer"
+        className="inline-flex items-center gap-2.5 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 px-5 py-4"
+      >
+        <span className="relative flex h-2.5 w-2.5">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
+        </span>
+        <p className="text-sm font-bold text-emerald-300">
+          We're live right now — join from the WhatsApp community!
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div data-testid="countdown-timer">
       <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">

@@ -618,6 +618,83 @@ async def admin_export(_: None = Depends(require_admin)):
     )
 
 
+DEMO_FIRST = ["Aarav", "Vivaan", "Ananya", "Diya", "Arjun", "Sneha", "Rohan", "Priya", "Karthik", "Ishita", "Aditya", "Meera", "Rahul", "Kavya", "Vikram", "Anjali", "Siddharth", "Pooja", "Nikhil", "Divya", "Manav", "Riya", "Varun", "Tanvi", "Harsh", "Nandini", "Yash", "Shreya", "Dev", "Lakshmi"]
+DEMO_LAST = ["Sharma", "Verma", "Patel", "Iyer", "Reddy", "Nair", "Gupta", "Khan", "Das", "Menon", "Chauhan", "Pillai", "Joshi", "Kulkarni", "Singh", "Rao", "Bose", "Mishra", "Chopra", "Hegde"]
+DEMO_COLLEGES = ["IIT Bombay", "NIT Trichy", "VIT Vellore", "SRM Institute of Science and Technology", "Anna University", "Manipal Institute of Technology", "RV College of Engineering", "Delhi Technological University", "JNTU Hyderabad", "PSG College of Technology", "Amrita Vishwa Vidyapeetham", "BITS Pilani"]
+DEMO_SOURCES = ["direct", "whatsapp_amrita_cse", "whatsapp_nit_trichy", "instagram_page", "college_club_ecell", "friend_forward"]
+DEMO_BRANCHES = [
+    "Computer Science & Engineering (CSE)",
+    "Information Technology (IT)",
+    "Electronics & Communication (ECE)",
+    "Electrical & Electronics (EEE)",
+    "Mechanical Engineering (ME)",
+    "Civil Engineering (CE)",
+    "Data Science / AI & ML",
+    "Chemical / Biotech / Other",
+]
+DEMO_YEARS = ["2026 (Final Year)", "2026 (Final Year)", "2026 (Final Year)", "2027", "2025 (Recent Grad)"]
+
+
+@api_router.get("/admin/demo/status")
+async def demo_status(_: None = Depends(require_admin)):
+    count = await db.registrations.count_documents({"is_demo": True})
+    return {"demo_count": count}
+
+
+@api_router.post("/admin/demo/seed")
+async def demo_seed(_: None = Depends(require_admin)):
+    existing = await db.registrations.count_documents({"is_demo": True})
+    if existing:
+        return {
+            "seeded": 0,
+            "demo_count": existing,
+            "message": "Demo data already loaded — clear it first to reseed.",
+        }
+    used_phones, used_emails = set(), set()
+    docs, codes = [], []
+    base = datetime.now(timezone.utc)
+    for _ in range(150):
+        fn, ln = random.choice(DEMO_FIRST), random.choice(DEMO_LAST)
+        while True:
+            phone = "9" + "".join(random.choices("0123456789", k=9))
+            if phone not in used_phones:
+                used_phones.add(phone)
+                break
+        n = random.randint(10, 99)
+        email = f"demo.{fn.lower()}.{ln.lower()}{n}@gmail.com"
+        while email in used_emails:
+            n += 1
+            email = f"demo.{fn.lower()}.{ln.lower()}{n}@gmail.com"
+        used_emails.add(email)
+        code = gen_referral_code()
+        codes.append(code)
+        created = base - timedelta(seconds=random.randint(600, 6 * 86400))
+        docs.append(
+            {
+                "_id": ObjectId(),
+                "full_name": f"{fn} {ln}",
+                "college": random.choice(DEMO_COLLEGES),
+                "branch": random.choice(DEMO_BRANCHES),
+                "grad_year": random.choice(DEMO_YEARS),
+                "whatsapp_number": phone,
+                "email": email,
+                "source": random.choice(DEMO_SOURCES),
+                "referred_by": random.choice(codes[:-1]) if codes[:-1] and random.random() < 0.3 else None,
+                "referral_code": code,
+                "created_at": created.isoformat(),
+                "is_demo": True,
+            }
+        )
+    await db.registrations.insert_many(docs)
+    return {"seeded": 150, "demo_count": 150, "message": "Loaded 150 demo registrations."}
+
+
+@api_router.delete("/admin/demo")
+async def demo_clear(_: None = Depends(require_admin)):
+    result = await db.registrations.delete_many({"is_demo": True})
+    return {"deleted": result.deleted_count, "demo_count": 0}
+
+
 app.include_router(api_router)
 
 app.add_middleware(

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
@@ -51,6 +51,10 @@ export default function ProjectMatcher() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    document.title = "Find Your First AI Project — Workshop Launchpad";
+  }, []);
 
   const choose = async (key, value) => {
     const next = { ...answers, [key]: value };

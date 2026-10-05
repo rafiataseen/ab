@@ -21,7 +21,7 @@ const LABEL_STYLE = { color: "#94A3B8" };
 export default function AdminCharts({ daily, bySource }) {
   return (
     <section className="grid gap-6 lg:grid-cols-2">
-      <div className="rounded-2xl border border-white/10 bg-[#0C1427] p-5 sm:p-6">
+      <div className="min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#0C1427] p-5 sm:p-6">
         <h2 className="text-sm font-bold tracking-tight sm:text-base">
           Registrations per day
         </h2>
@@ -58,7 +58,7 @@ export default function AdminCharts({ daily, bySource }) {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-[#0C1427] p-5 sm:p-6">
+      <div className="min-w-0 overflow-hidden rounded-2xl border border-white/10 bg-[#0C1427] p-5 sm:p-6">
         <h2 className="text-sm font-bold tracking-tight sm:text-base">
           Registrations by source
         </h2>

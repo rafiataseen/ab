@@ -29,15 +29,23 @@ const rankStyle = (rank) =>
 export default function Leaderboard() {
   const [data, setData] = useState({ colleges: [], referrers: [] });
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+
+  useEffect(() => {
+    document.title = "Leaderboard — Workshop Launchpad";
+  }, []);
 
   useEffect(() => {
     let mounted = true;
     const load = async () => {
       try {
         const res = await axios.get(`${API_URL}/leaderboard`);
-        if (mounted) setData(res.data);
+        if (mounted) {
+          setData(res.data);
+          setLoadError(false);
+        }
       } catch {
-        /* keep last known data */
+        if (mounted) setLoadError(true);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -101,7 +109,7 @@ export default function Leaderboard() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-            className="rounded-3xl border border-white/10 bg-[#0C1427] p-5 sm:p-7 lg:col-span-3"
+            className="min-w-0 rounded-3xl border border-white/10 bg-[#0C1427] p-5 sm:p-7 lg:col-span-3"
           >
             <div className="flex items-center gap-2.5">
               <Trophy size={19} className="text-emerald-400" />
@@ -109,7 +117,16 @@ export default function Leaderboard() {
             </div>
 
             <div data-testid="top-colleges-table" className="mt-5 space-y-2">
-              {!loading && data.colleges.length === 0 && (
+              {loadError && data.colleges.length === 0 && (
+                <p
+                  data-testid="leaderboard-error"
+                  className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-6 text-center text-sm text-red-300"
+                >
+                  Couldn't load the leaderboard — check your connection. Retrying
+                  automatically every 30 seconds.
+                </p>
+              )}
+              {!loading && !loadError && data.colleges.length === 0 && (
                 <p className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-6 text-center text-sm text-slate-400">
                   No registrations yet — be the first to put your college on the board.
                 </p>
@@ -174,7 +191,7 @@ export default function Leaderboard() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="rounded-3xl border border-white/10 bg-[#0C1427] p-5 sm:p-7 lg:col-span-2"
+            className="min-w-0 rounded-3xl border border-white/10 bg-[#0C1427] p-5 sm:p-7 lg:col-span-2"
           >
             <div className="flex items-center gap-2.5">
               <Users size={19} className="text-emerald-400" />

@@ -9,6 +9,7 @@ import TopTables from "@/components/admin/TopTables";
 import Funnel from "@/components/admin/Funnel";
 import RegistrationsTable from "@/components/admin/RegistrationsTable";
 import LinkBuilder from "@/components/admin/LinkBuilder";
+import DemoMode from "@/components/admin/DemoMode";
 
 const TOKEN_KEY = "wl_admin_token";
 
@@ -19,6 +20,10 @@ export default function Admin() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    document.title = "Admin — Workshop Launchpad";
+  }, []);
 
   const load = useCallback(
     async (tok) => {
@@ -169,6 +174,7 @@ export default function Admin() {
             <Funnel funnel={data.funnel} />
             <RegistrationsTable token={token} />
             <LinkBuilder />
+            <DemoMode token={token} onChanged={load} />
           </>
         )}
       </main>

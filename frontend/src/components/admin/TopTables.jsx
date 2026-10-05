@@ -4,7 +4,7 @@ export default function TopTables({ topColleges, topReferrers }) {
   const leader = topColleges[0]?.registrations || 1;
   return (
     <section className="grid gap-6 lg:grid-cols-2">
-      <div className="rounded-2xl border border-white/10 bg-[#0C1427] p-5 sm:p-6">
+      <div className="min-w-0 rounded-2xl border border-white/10 bg-[#0C1427] p-5 sm:p-6">
         <div className="flex items-center gap-2">
           <Trophy size={16} className="text-emerald-400" />
           <h2 className="text-sm font-bold tracking-tight sm:text-base">Top 10 Colleges</h2>
@@ -39,7 +39,7 @@ export default function TopTables({ topColleges, topReferrers }) {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-[#0C1427] p-5 sm:p-6">
+      <div className="min-w-0 rounded-2xl border border-white/10 bg-[#0C1427] p-5 sm:p-6">
         <div className="flex items-center gap-2">
           <Users size={16} className="text-emerald-400" />
           <h2 className="text-sm font-bold tracking-tight sm:text-base">Top 10 Referrers</h2>
